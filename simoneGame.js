@@ -1,4 +1,6 @@
 let numRounds = 0;
+let sequence = [];
+let clickedSequence = [];
 
 //Sounds
 let redSound = new Audio('sounds/red.wav');
@@ -14,6 +16,18 @@ let blueLight = document.getElementById("blueSq");
 let yellowLight = document.getElementById("yellowSq");
 
 startButton.addEventListener("click", runGame);
+greenLight.addEventListener("click", () => {
+    clickedSequence[clickedSequence.length] = 4;
+});
+redLight.addEventListener("click", () => {
+    clickedSequence[clickedSequence.length] = 2;
+});
+blueLight.addEventListener("click", () => {
+    clickedSequence[clickedSequence.length] = 3;
+});
+yellowLight.addEventListener("click", () => {
+    clickedSequence[clickedSequence.length] = 4;
+});
 
 //Updates the number of rounds to play
 function updateRounds(){
@@ -24,10 +38,73 @@ function updateRounds(){
 //Runs the game
 function runGame(){
     updateRounds();
-    greet();
     for(let round = 0; round < numRounds; round++){
-        console.log("go");
+        sequence[round] = Math.ceil(Math.random() * 4);
     }
+    console.log(sequence);
+    let greeting = new Promise((resolve, reject) => {
+        resolve(greet());
+        reject("Error, greeting failed");
+    })
+    greeting.then(() => {
+
+        for(let round = 0; round < numRounds; round++){
+            //console.log(sequence[round]);
+
+            let sequenceRun = new Promise((resolve, reject) => {
+                resolve(playSequence());
+                reject("Error, displaying sequence failed");
+            })
+            sequenceRun.then(() => {
+                clickedSequence = [];
+                let waitForInput = new Promise((resolve, reject) => {
+                    if(clickedSequence.length == round){
+                        resolve();
+                    }
+                })
+            })
+            //Plays the sequence of colors
+            async function playSequence(){
+                let wait = await waitAMoment(4);
+                //console.log("sequencing");
+                for(let sequenceNum = 0; sequenceNum <= round; sequenceNum++){
+                    //console.log(sequence);
+                    if(sequence[sequenceNum] == 1){
+                        //console.log("green");
+                        greenLight.className = "lightgreen";
+                        greenSound.play();
+                    } else if (sequence[sequenceNum] == 2){
+                        //console.log("red");
+                        redLight.className = "lightred";
+                        redSound.play();
+                    } else if(sequence[sequenceNum] == 3){
+                        //console.log("blue");
+                        blueLight.className = "lightblue";
+                        blueSound.play();
+                    } else {
+                        //console.log("yellow");
+                        yellowLight.className = "lightyellow";
+                        yellowSound.play();
+                    }
+                
+                    wait = await waitAMoment(.15);
+
+                    //Returns colors to original values
+                    if(sequence[sequenceNum] == 1){
+                        greenLight.className = "green";
+                    } else if (sequence[sequenceNum] == 2){
+                        redLight.className = "red";
+                    } else if(sequence[sequenceNum] == 3){
+                        blueLight.className = "blue";
+                    } else {
+                        yellowLight.className = "yellow";
+                    }
+
+                    wait = await waitAMoment(1);
+                }
+            }
+        }
+    })
 }
 
 //Plays a random sequence of 12 blinking lights to greet the user before playing
