@@ -7,5 +7,6 @@ function updateRounds(){
 }
 
 function runGame(){
-    //Run game here
+    updateRounds();
+    console.log(numRounds);
 }
