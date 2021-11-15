@@ -25,6 +25,9 @@ function updateRounds(){
 function runGame(){
     updateRounds();
     greet();
+    for(let round = 0; round < numRounds; round++){
+        console.log("go");
+    }
 }
 
 //Plays a random sequence of 12 blinking lights to greet the user before playing
@@ -65,10 +68,26 @@ async function greet(){
     }
 }
 
+//Waits the indicated amount of time
 function waitAMoment(time = 1.0){
     return new Promise(resolve => {
         setTimeout(() => {
             resolve("resolved");
         }, time * 1000);
     })
+}
+
+function nextRound(){
+    let nextRoundSound = 'sounds/nextRound.wav';
+    nextRoundSound.play();
+}
+
+function lose(){
+    let loseSound = 'sounds/lose.wav';
+    loseSound.play();
+}
+
+function win(){
+    let winSound = 'sounds/win.mp3';
+    winSound.play();
 }
