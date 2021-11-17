@@ -4,6 +4,7 @@ let clickedSequence = [];
 let lookingForInput = false;
 let round = 0;
 let lost = false;
+let won = false;
 
 //Light sections
 let startButton = document.getElementById("play");
@@ -84,8 +85,10 @@ function getSolution(){
 }
 async function playSequence(){
     lost = false;
+    won = false;
     let wait = await waitAMoment(4);
     if(round < numRounds){
+        console.log(round);
         for(let sequenceNum = 0; sequenceNum <= round; sequenceNum++){
             if(sequence[sequenceNum] == 1){
                 greenLight.className = "lightgreen";
@@ -121,8 +124,8 @@ async function playSequence(){
     lookingForInput = true;
     clickedSequence = [];
 
-    if(round < numRounds ){
-        if(!lost){
+    if(round < numRounds){
+        if(!lost && !won){
             await getUserInput();
         } else {
             return;
@@ -141,7 +144,14 @@ function getUserInput(){
             } else if(clickedSequence.length >= round + 1){
                 lookingForInput = false;
                 round++;
-                playSequence();
+                if(clickedSequence[0] == sequence[0] && clickedSequence[1] == sequence[1]){
+                    console.log("won");
+                    win();
+                    won = true;
+                } else {
+                    nextRound();
+                    playSequence();
+                }
                 resolve();
             }
         });
@@ -208,6 +218,7 @@ function lose(){
 }
 
 function win(){
+    console.log("in Win");
     let winSound = 'sounds/win.mp3';
     (new Audio(winSound)).play();
 }
