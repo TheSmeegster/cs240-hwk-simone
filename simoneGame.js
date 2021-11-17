@@ -2,6 +2,7 @@ let numRounds = 0;
 let sequence = [];
 let clickedSequence = [];
 let lookingForInput = false;
+let round = 0;
 
 //Light sections
 let startButton = document.getElementById("play");
@@ -42,19 +43,21 @@ function updateRounds(){
 //Runs the game
 function getSolution(){
     updateRounds();
-    for(let round = 0; round < numRounds; round++){
+    for(round = 0; round < numRounds; round++){
         sequence[round] = Math.ceil(Math.random() * 4);
     }
+    round = 0;
     let greeting = new Promise((resolve, reject) => {
         resolve(start());
+        //resolve(axios.get("http://cs.pugetsound.edu/~dchiu/cs240/api/simone/", "start"))
         reject("Error, greeting failed");
     });
     greeting.then(() => {
         runRounds();
         async function runRounds(){
-            let round = 0;
+            //let round = 0;
             let sequenceRun = new Promise((resolve, reject) => {
-                resolve(playSequence());
+                resolve(playSequence(round));
                 reject("Error, displaying sequence failed");
             });
             sequenceRun.then(() => {
@@ -65,57 +68,55 @@ function getSolution(){
                     }
                 })
             });
-            //Plays the sequence of colors
-            async function playSequence(){
-                let wait = await waitAMoment(4);
-                for(let sequenceNum = 0; sequenceNum <= round; sequenceNum++){
-                    if(sequence[sequenceNum] == 1){
-                        greenLight.className = "lightgreen";
-                        (new Audio("sounds/green.wav")).play();
-                    } else if (sequence[sequenceNum] == 2){
-                        redLight.className = "lightred";
-                        (new Audio("sounds/red.wav")).play();
-                    } else if(sequence[sequenceNum] == 3){
-                        blueLight.className = "lightblue";
-                        (new Audio("sounds/blue.wav")).play();
-                    } else {
-                        yellowLight.className = "lightyellow";
-                        (new Audio("sounds/yellow.wav")).play();
-                    }
-                
-                    wait = await waitAMoment(.15);
-
-                    //Returns colors to original values
-                    if(sequence[sequenceNum] == 1){
-                        greenLight.className = "green";
-                    } else if (sequence[sequenceNum] == 2){
-                        redLight.className = "red";
-                    } else if(sequence[sequenceNum] == 3){
-                        blueLight.className = "blue";
-                    } else {
-                        yellowLight.className = "yellow";
-                    }
-
-                    wait = await waitAMoment(.25);
-                }
-
-                lookingForInput = true;
-                clickedSequence = [];
-                console.log("getting input");
-
-                if(round < numRounds ){
-                    round++;
-                    await getUserInput(round);
-                    playSequence();
-                } else {
-                    console.log("done")
-                }
-            }
         }
     });
 }
+async function playSequence(){
+    let wait = await waitAMoment(4);
+    for(let sequenceNum = 0; sequenceNum <= round; sequenceNum++){
+        if(sequence[sequenceNum] == 1){
+            greenLight.className = "lightgreen";
+            (new Audio("sounds/green.wav")).play();
+        } else if (sequence[sequenceNum] == 2){
+            redLight.className = "lightred";
+            (new Audio("sounds/red.wav")).play();
+        } else if(sequence[sequenceNum] == 3){
+            blueLight.className = "lightblue";
+            (new Audio("sounds/blue.wav")).play();
+        } else {
+            yellowLight.className = "lightyellow";
+            (new Audio("sounds/yellow.wav")).play();
+        }
+    
+        wait = await waitAMoment(.15);
 
-function getUserInput(round = 0){
+        //Returns colors to original values
+        if(sequence[sequenceNum] == 1){
+            greenLight.className = "green";
+        } else if (sequence[sequenceNum] == 2){
+            redLight.className = "red";
+        } else if(sequence[sequenceNum] == 3){
+            blueLight.className = "blue";
+        } else {
+            yellowLight.className = "yellow";
+        }
+
+        wait = await waitAMoment(.25);
+    }
+
+    lookingForInput = true;
+    clickedSequence = [];
+    console.log("getting input");
+
+    if(round < numRounds ){
+        
+        await getUserInput(round);
+    } else {
+        console.log("done");
+    }
+}
+
+function getUserInput(){
     while(lookingForInput){
         console.log("inputting");
         return new Promise((resolve, reject) => {
@@ -128,6 +129,8 @@ function getUserInput(round = 0){
             if(clickedSequence.length >= round){
                 console.log("correct resolution");
                 lookingForInput = false;
+                round++;
+                playSequence();
                 resolve();
             }
         });
