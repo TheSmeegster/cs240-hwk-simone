@@ -3,6 +3,7 @@ let sequence = [];
 let clickedSequence = [];
 let lookingForInput = false;
 let round = 0;
+let lost = false;
 
 //Light sections
 let startButton = document.getElementById("play");
@@ -49,68 +50,64 @@ function getSolution(){
     round = 0;
     let greeting = new Promise((resolve, reject) => {
         resolve(start());
-        //resolve(axios.get("http://cs.pugetsound.edu/~dchiu/cs240/api/simone/", "start"))
         reject("Error, greeting failed");
     });
     greeting.then(() => {
         runRounds();
         async function runRounds(){
-            //let round = 0;
             let sequenceRun = new Promise((resolve, reject) => {
-                resolve(playSequence(round));
+                resolve(playSequence());
                 reject("Error, displaying sequence failed");
-            });
-            sequenceRun.then(() => {
-                clickedSequence = [];
-                let waitForInput = new Promise((resolve, reject) => {
-                    if(clickedSequence.length == round){
-                        resolve();
-                    }
-                })
             });
         }
     });
 }
 async function playSequence(){
+    lost = false;
     let wait = await waitAMoment(4);
-    for(let sequenceNum = 0; sequenceNum <= round; sequenceNum++){
-        if(sequence[sequenceNum] == 1){
-            greenLight.className = "lightgreen";
-            (new Audio("sounds/green.wav")).play();
-        } else if (sequence[sequenceNum] == 2){
-            redLight.className = "lightred";
-            (new Audio("sounds/red.wav")).play();
-        } else if(sequence[sequenceNum] == 3){
-            blueLight.className = "lightblue";
-            (new Audio("sounds/blue.wav")).play();
-        } else {
-            yellowLight.className = "lightyellow";
-            (new Audio("sounds/yellow.wav")).play();
-        }
+    if(round < numRounds){
+        for(let sequenceNum = 0; sequenceNum <= round; sequenceNum++){
+            if(sequence[sequenceNum] == 1){
+                greenLight.className = "lightgreen";
+                (new Audio("sounds/green.wav")).play();
+            } else if (sequence[sequenceNum] == 2){
+                redLight.className = "lightred";
+                (new Audio("sounds/red.wav")).play();
+            } else if(sequence[sequenceNum] == 3){
+                blueLight.className = "lightblue";
+                (new Audio("sounds/blue.wav")).play();
+            } else {
+                yellowLight.className = "lightyellow";
+                (new Audio("sounds/yellow.wav")).play();
+            }
+        
+            wait = await waitAMoment(.15);
     
-        wait = await waitAMoment(.15);
-
-        //Returns colors to original values
-        if(sequence[sequenceNum] == 1){
-            greenLight.className = "green";
-        } else if (sequence[sequenceNum] == 2){
-            redLight.className = "red";
-        } else if(sequence[sequenceNum] == 3){
-            blueLight.className = "blue";
-        } else {
-            yellowLight.className = "yellow";
+            //Returns colors to original values
+            if(sequence[sequenceNum] == 1){
+                greenLight.className = "green";
+            } else if (sequence[sequenceNum] == 2){
+                redLight.className = "red";
+            } else if(sequence[sequenceNum] == 3){
+                blueLight.className = "blue";
+            } else {
+                yellowLight.className = "yellow";
+            }
+    
+            wait = await waitAMoment(.25);
         }
-
-        wait = await waitAMoment(.25);
     }
-
+    
     lookingForInput = true;
     clickedSequence = [];
     console.log("getting input");
 
     if(round < numRounds ){
-        
-        await getUserInput(round);
+        if(!lost){
+            await getUserInput();
+        } else {
+            return;
+        }
     } else {
         console.log("done");
     }
@@ -124,9 +121,9 @@ function getUserInput(){
                 console.log("Loss Resolution");
                 lookingForInput = false;
                 lose();
+                lost = true;
                 resolve();
-            }
-            if(clickedSequence.length >= round){
+            } else if(clickedSequence.length >= round + 1){
                 console.log("correct resolution");
                 lookingForInput = false;
                 round++;
