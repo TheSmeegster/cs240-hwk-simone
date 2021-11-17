@@ -6,32 +6,43 @@ let round = 0;
 let lost = false;
 let won = false;
 
-//Light sections
+
+let statusBar = document.getElementById("status");
+
 let startButton = document.getElementById("play");
+
+//Light sections
 let greenLight = document.getElementById("greenSq");
 let redLight = document.getElementById("redSq");
 let blueLight = document.getElementById("blueSq");
 let yellowLight = document.getElementById("yellowSq");
 
+//Button to begin the game
 startButton.addEventListener("click", getSolution);
 
+//Click listeners for buttons
 greenLight.addEventListener("click", () => {
     clickedSequence[clickedSequence.length] = 1;
+    (new Audio("sounds/green.wav")).play();
     getUserInput();
 });
 redLight.addEventListener("click", () => {
     clickedSequence[clickedSequence.length] = 2;
+    (new Audio("sounds/red.wav")).play();
     getUserInput();
 });
 blueLight.addEventListener("click", () => {
     clickedSequence[clickedSequence.length] = 3;
+    (new Audio("sounds/blue.wav")).play();
     getUserInput();
 });
 yellowLight.addEventListener("click", () => {
     clickedSequence[clickedSequence.length] = 4;
+    (new Audio("sounds/yellow.wav")).play();
     getUserInput();
 });
 
+//Mouseover and off listeners to display border opn buttons
 greenLight.addEventListener("mouseover", () =>{
     greenLight.style.border = ".5px solid white";
 });
@@ -64,15 +75,20 @@ function updateRounds(){
 
 //Runs the game
 function getSolution(){
+
+    //Prepares the rounds and target sequence before the game starts
     updateRounds();
     for(round = 0; round < numRounds; round++){
         sequence[round] = Math.ceil(Math.random() * 4);
     }
     round = 0;
+
+    //Runs the greeting sequence
     let greeting = new Promise((resolve, reject) => {
         resolve(start());
         reject("Error, greeting failed");
     });
+    //Starts the game after greeting the user
     greeting.then(() => {
         runRounds();
         async function runRounds(){
@@ -83,10 +99,17 @@ function getSolution(){
         }
     });
 }
+
+//Runs the game and displays the sequence piece by piece
 async function playSequence(){
+
     lost = false;
     won = false;
+
     let wait = await waitAMoment(4);
+    statusBar.innerHTML = "Round " + (round + 1) + " of " + numRounds;
+
+    //Plays the sequence based on what round it is and the max number of rounds
     if(round < numRounds){
         console.log(round);
         for(let sequenceNum = 0; sequenceNum <= round; sequenceNum++){
@@ -121,9 +144,11 @@ async function playSequence(){
         }
     }
 
+    //Confirms the game is waiting for input and clears the clicked sequence
     lookingForInput = true;
     clickedSequence = [];
 
+    //Waits for more input if the game is not done
     if(round < numRounds){
         if(!lost && !won){
             await getUserInput();
@@ -133,8 +158,12 @@ async function playSequence(){
     }
 }
 
+//Gets user input and processes it
 function getUserInput(){
     while(lookingForInput){
+        if(clickedSequence.length > 0){
+            statusBar.innerHTML = "So far so good! " + (round - clickedSequence.length + 1) + " more to go!"
+        }
         return new Promise((resolve, reject) => {
             if(clickedSequence[clickedSequence.length - 1] != sequence[clickedSequence.length - 1]){
                 lookingForInput = false;
@@ -144,8 +173,7 @@ function getUserInput(){
             } else if(clickedSequence.length >= round + 1){
                 lookingForInput = false;
                 round++;
-                if(clickedSequence[0] == sequence[0] && clickedSequence[1] == sequence[1]){
-                    console.log("won");
+                if(clickedSequence.length >= sequence.length){
                     win();
                     won = true;
                 } else {
@@ -207,18 +235,25 @@ function waitAMoment(time = 1.0){
     })
 }
 
+//Plays the next round audio
 function nextRound(){
+    statusBar.innerHTML = "Good job! Prepare for next round";
     let nextRoundSound = 'sounds/nextRound.wav';
     (new Audio(nextRoundSound)).play();
 }
 
+//Plays the lose audio and changes background color to pink
 function lose(){
+    statusBar.innerHTML = "Incorrect! You lose!";
     let loseSound = 'sounds/lose.wav';
+    document.body.style.background = "hotpink";
     (new Audio(loseSound)).play();
 }
 
+//Plays win audio and changes background color to DeepSkyBlue
 function win(){
-    console.log("in Win");
+    statusBar.innerHTML = "Yay you win!";
     let winSound = 'sounds/win.mp3';
+    document.body.style.background = "DeepSkyBlue";
     (new Audio(winSound)).play();
 }
