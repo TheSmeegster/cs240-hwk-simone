@@ -17,28 +17,48 @@ startButton.addEventListener("click", getSolution);
 greenLight.addEventListener("click", () => {
     clickedSequence[clickedSequence.length] = 1;
     getUserInput();
-    console.log(clickedSequence);
 });
 redLight.addEventListener("click", () => {
     clickedSequence[clickedSequence.length] = 2;
     getUserInput();
-    console.log(clickedSequence);
 });
 blueLight.addEventListener("click", () => {
     clickedSequence[clickedSequence.length] = 3;
     getUserInput();
-    console.log(clickedSequence);
 });
 yellowLight.addEventListener("click", () => {
     clickedSequence[clickedSequence.length] = 4;
     getUserInput();
-    console.log(clickedSequence);
+});
+
+greenLight.addEventListener("mouseover", () =>{
+    greenLight.style.border = ".5px solid white";
+});
+greenLight.addEventListener("mouseout", () => {
+    greenLight.style.border = "";
+});
+redLight.addEventListener("mouseover", () =>{
+    redLight.style.border = ".5px solid white";
+});
+redLight.addEventListener("mouseout", () => {
+    redLight.style.border = "";
+});
+blueLight.addEventListener("mouseover", () =>{
+    blueLight.style.border = ".5px solid white";
+});
+blueLight.addEventListener("mouseout", () => {
+    blueLight.style.border = "";
+});
+yellowLight.addEventListener("mouseover", () =>{
+    yellowLight.style.border = ".5px solid white";
+});
+yellowLight.addEventListener("mouseout", () => {
+    yellowLight.style.border = "";
 });
 
 //Updates the number of rounds to play
 function updateRounds(){
     numRounds = document.getElementById("rounds").value;
-    console.log(numRounds);
 }
 
 //Runs the game
@@ -97,10 +117,9 @@ async function playSequence(){
             wait = await waitAMoment(.25);
         }
     }
-    
+
     lookingForInput = true;
     clickedSequence = [];
-    console.log("getting input");
 
     if(round < numRounds ){
         if(!lost){
@@ -108,23 +127,18 @@ async function playSequence(){
         } else {
             return;
         }
-    } else {
-        console.log("done");
     }
 }
 
 function getUserInput(){
     while(lookingForInput){
-        console.log("inputting");
         return new Promise((resolve, reject) => {
             if(clickedSequence[clickedSequence.length - 1] != sequence[clickedSequence.length - 1]){
-                console.log("Loss Resolution");
                 lookingForInput = false;
                 lose();
                 lost = true;
                 resolve();
             } else if(clickedSequence.length >= round + 1){
-                console.log("correct resolution");
                 lookingForInput = false;
                 round++;
                 playSequence();
